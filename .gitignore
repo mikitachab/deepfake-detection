@@ -1,0 +1,7 @@
+__pycache__
+data
+.vscode
+deepfake-detection-challenge.zip
+venv
+dfdc_train_*
+lintel
