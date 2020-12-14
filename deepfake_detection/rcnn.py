@@ -22,6 +22,7 @@ class RCNN(nn.Module):
     def forward(self, x):
         """
         works only for input with batch_size=1
+        one sample is sequense of frames
         """
         c_out = self.cnn(x)
         r_out, (h_n, h_c) = self.lstm(torch.unsqueeze(c_out, 0))
