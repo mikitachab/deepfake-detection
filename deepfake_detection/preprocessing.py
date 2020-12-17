@@ -1,30 +1,40 @@
 import numpy as np
-
-import cv2
-from skimage.filters import unsharp_mask
-from skimage import exposure
-
-from deepfake_detection import utils
+import skimage as ski
+from skimage import feature
 
 
 class FaceExtract:
-    def __init__(self, cascade_model="haarcascade_frontalface_default.xml", padding=10):
-        self.face_detector = cv2.CascadeClassifier(
-            cv2.data.haarcascades + cascade_model
-        )
+    def __init__(self, padding=10):
+        trained_file = ski.data.lbp_frontal_face_cascade_filename()
+        self.face_detector = feature.Cascade(trained_file)
         self.padding = padding
+        self.reziser = Resize((224, 224))
 
     def __call__(self, image):
-        image = utils.pil_to_opencv(image)
-        faces_detected = self.face_detector.detectMultiScale(
-            image, scaleFactor=1.1, minNeighbors=5
+        detected = self.face_detector.detect_multi_scale(
+            img=image,
+            scale_factor=1.2,
+            step_ratio=1,
+            min_size=(30, 30),
+            max_size=(224, 224),
+            min_neighbour_number=5,
         )
-        if len(faces_detected) == 0:
-            return image
-        (x, y, w, h) = faces_detected[0]
+        if len(detected) == 0:
+            return self.reziser(image)
+        (x, y, w, h) = patch_to_tuple(detected[0])
         p = self.padding
         cropped_face = image[y - p + 1 : y + h + p, x - p + 1 : x + w + p]
-        return utils.opencv_to_pil(cropped_face)
+        if not validate_shape(cropped_face.shape):
+            return self.reziser(image)
+        return cropped_face
+
+
+class Resize:
+    def __init__(self, shape):
+        self.shape = shape
+
+    def __call__(self, image):
+        return ski.transform.resize(image, self.shape)
 
 
 class ToArray:
@@ -34,17 +44,26 @@ class ToArray:
 
 class Sharp:
     def __call__(self, image):
-        return unsharp_mask(image, multichannel=True)
+        return ski.filters.unsharp_mask(image, multichannel=True)
 
 
 class EqualizeHistogram:
     def __call__(self, image):
-        return exposure.equalize_hist(image)
+        return ski.exposure.equalize_hist(image)
 
 
 class ToImage:
     def __call__(self, float_array):
+        print("s", float_array.shape)
         img = float_array.astype(np.float64) / float_array.max()
         img = 255 * img
         img = img.astype(np.uint8)
         return img
+
+
+def patch_to_tuple(patch):
+    return patch["c"], patch["r"], patch["width"], patch["height"]
+
+
+def validate_shape(shape):
+    return all(shape)

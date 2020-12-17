@@ -12,8 +12,9 @@ import torchvideo.transforms as VT
 from deepfake_detection.constants import N_FRAMES, LABEL_MAP, IMAGE_SIZE
 from deepfake_detection import utils
 from deepfake_detection.preprocessing import (
-    FaceExtract,
     ToArray,
+    Resize,
+    FaceExtract,
     Sharp,
     EqualizeHistogram,
     ToImage,
@@ -55,8 +56,9 @@ def get_dataset(data_path="data/train_sample_videos"):
 
     default_transform = T.Compose(
         [
-            FaceExtract(),
             ToArray(),
+            FaceExtract(),
+            # Resize((224, 224)),
             Sharp(),
             EqualizeHistogram(),
             ToImage(),
