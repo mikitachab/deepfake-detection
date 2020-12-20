@@ -9,9 +9,11 @@ class RCNN(nn.Module):
     stacks rnn on top of cnn
     """
 
-    def __init__(self, rnn_hidden_size=128, num_classes=2, rnn_num_layers=2):
+    def __init__(self, num_classes=2, rnn_hidden_size=128, rnn_num_layers=2, cnn=None):
         super(RCNN, self).__init__()
-        self.cnn = torchvision.models.resnet18(pretrained=True)
+        if cnn is None:
+            cnn = torchvision.models.resnet18(pretrained=True)
+        self.cnn = cnn
         n_features = self.cnn.fc.in_features
         self.cnn.fc = nn.Identity()
         self.lstm = nn.LSTM(

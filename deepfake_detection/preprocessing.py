@@ -5,13 +5,12 @@ from skimage import feature
 
 class FaceExtract:
     def __init__(self, padding=10):
-        trained_file = ski.data.lbp_frontal_face_cascade_filename()
-        self.face_detector = feature.Cascade(trained_file)
         self.padding = padding
-        self.reziser = Resize((224, 224))
 
     def __call__(self, image):
-        detected = self.face_detector.detect_multi_scale(
+        trained_file = ski.data.lbp_frontal_face_cascade_filename()
+        face_detector = feature.Cascade(trained_file)
+        detected = face_detector.detect_multi_scale(
             img=image,
             scale_factor=1.2,
             step_ratio=1,
@@ -20,12 +19,12 @@ class FaceExtract:
             min_neighbour_number=5,
         )
         if len(detected) == 0:
-            return self.reziser(image)
+            return image
         (x, y, w, h) = patch_to_tuple(detected[0])
         p = self.padding
         cropped_face = image[y - p + 1 : y + h + p, x - p + 1 : x + w + p]
         if not validate_shape(cropped_face.shape):
-            return self.reziser(image)
+            return image
         return cropped_face
 
 
@@ -54,7 +53,6 @@ class EqualizeHistogram:
 
 class ToImage:
     def __call__(self, float_array):
-        print("s", float_array.shape)
         img = float_array.astype(np.float64) / float_array.max()
         img = 255 * img
         img = img.astype(np.uint8)

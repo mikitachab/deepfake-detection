@@ -1,4 +1,6 @@
 import os
+import concurrent.futures
+import multiprocessing as mp
 
 import torch
 from torchvision import transforms as T
@@ -22,8 +24,9 @@ from deepfake_detection.preprocessing import (
 
 
 class WrapDataset(Dataset):
-    def __init__(self, video_ds, transform=None):
+    def __init__(self, video_ds, n_workres, transform=None):
         self.video_ds = video_ds
+        self.n_workres = n_workres
         if transform is None:
             self.transform = lambda x: x
         else:
@@ -34,14 +37,16 @@ class WrapDataset(Dataset):
 
     def __getitem__(self, idx):
         x, y = self.video_ds[idx]
-        x = list(x)
-        xts = torch.empty((len(x), 3, IMAGE_SIZE, IMAGE_SIZE))
-        for i in range(len(x)):
-            xts[i] = self.transform(x[i])
+        with mp.get_context("spawn").Pool(self.n_workres) as pool:
+            processed_x = pool.map(self.transform, list(x))
+        xts = torch.empty((len(processed_x), 3, IMAGE_SIZE, IMAGE_SIZE))
+        for i, timage in enumerate(processed_x):
+            xts[i] = processed_x[i]
         return xts, torch.tensor(y)
 
 
-def get_dataset(data_path="data/train_sample_videos"):
+def get_dataset(data_path, n_workres):
+    print("reading data from: ", data_path)
     metadata_path = os.path.join(data_path, "metadata.json")
     metadata = utils.load_json(metadata_path)
     labels = {name: LABEL_MAP[data["label"]] for name, data in metadata.items()}
@@ -57,8 +62,8 @@ def get_dataset(data_path="data/train_sample_videos"):
     default_transform = T.Compose(
         [
             ToArray(),
-            FaceExtract(),
-            # Resize((224, 224)),
+            Resize((224, 224)),
+            FaceExtract(),  # pickle error
             Sharp(),
             EqualizeHistogram(),
             ToImage(),
@@ -68,5 +73,5 @@ def get_dataset(data_path="data/train_sample_videos"):
         ]
     )
 
-    dataset = WrapDataset(video_ds, transform=default_transform)
+    dataset = WrapDataset(video_ds, transform=default_transform, n_workres=n_workres)
     return dataset
