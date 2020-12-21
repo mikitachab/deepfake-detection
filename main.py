@@ -3,7 +3,7 @@ import argparse
 
 import torch
 
-from deepfake_detection import get_dataset, RCNN, SGDLearner
+from deepfake_detection import get_dataset, RCNN, SGDLearner, VideoDataset
 
 
 def argparse_setup():
