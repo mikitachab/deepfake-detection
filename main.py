@@ -17,13 +17,14 @@ def argparse_setup():
     )
     parser.add_argument("--jobs", "-j", default=10, type=int)
     parser.add_argument("--epochs", "-e", default=1, type=int)
+    parser.add_argument("--use-old-cache", default=False, action="store_true")
     return parser
 
 
 def main(args):
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-    dataset = get_dataset(args.data_path, args.jobs)
+    dataset = get_dataset(args.data_path, args.jobs, args.use_old_cache)
     model = RCNN().to(device)
 
     learner = SGDLearner(model=model, dataset=dataset, device=device)

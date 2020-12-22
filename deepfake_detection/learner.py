@@ -14,6 +14,7 @@ class SGDLearner:
         self.optimizer = optim.SGD(self.model.parameters(), lr=0.01)
 
     def fit(self, epochs=1):
+        self.model.train()
         for e in range(epochs):
             print("e =", e + 1)
             running_loss = 0.0
@@ -29,3 +30,7 @@ class SGDLearner:
                     running_loss += loss.item()
                     pb.update(1)
                 print("loss = ", loss.item())
+
+    def predict(self, t):
+        self.model.eval()
+        return self.model(t)

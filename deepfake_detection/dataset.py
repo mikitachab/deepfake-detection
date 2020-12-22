@@ -19,6 +19,31 @@ from deepfake_detection.preprocessing import (
 )
 
 
+class VideoDataCache:
+    def __init__(self, cache_path, use_old):
+        self.cache_path = cache_path
+        self.cached = {}
+        if use_old:
+            self.cached = self._get_prepopulated_cached()
+        else:
+            os.makedirs(self.cache_path, exist_ok=True)
+
+    def _get_prepopulated_cached(self):
+        return {filename: True for filename in os.listdir(self.cache_path)}
+
+    def get(self, filename):
+        if self.cached.get(filename):
+            full_path = os.path.join(self.cache_path, filename)
+            return torch.load(full_path)
+        return None
+
+    def save(self, filename, tensor):
+        if not self.cached.get(filename):
+            full_path = os.path.join(self.cache_path, filename)
+            torch.save(tensor, full_path)
+            self.cached[filename] = True
+
+
 def default_file_filter(filename: str):
     return filename.endswith(".mp4")
 
@@ -32,41 +57,55 @@ default_transform = T.Compose(
 
 
 class VideoDataset(Dataset):
-    def __init__(self, path, metadata_filename="metadata.json", file_filter=None):
+    def __init__(
+        self, path, use_old_cache, metadata_filename="metadata.json", file_filter=None
+    ):
         self.path = path
         if file_filter is None:
             file_filter = default_file_filter
         self.file_filter = file_filter
-        self.video_paths = [
-            file for file in os.listdir(self.path) if self.file_filter(file)
-        ]
+        self.video_paths = self._get_video_paths()
+        self.labels = self._load_labels(metadata_filename)
+        self.cache = VideoDataCache("data/cache", use_old_cache)  # TODO fix hardcode
+
+    def _load_labels(self, metadata_filename):
         metadata = utils.load_json(os.path.join(self.path, metadata_filename))
-        self.labels = {
+        return {
             filename: LABEL_MAP[data["label"]] for filename, data in metadata.items()
         }
+
+    def _get_video_paths(self):
+        return [file for file in os.listdir(self.path) if self.file_filter(file)]
 
     def __len__(self):
         return len(self.video_paths)
 
-    def __getitem__(self, idx):
-        filename = self.video_paths[idx]
-        label = self.labels[filename]
+    def _get_frames_tensor(self, filename):
         video_full_path = os.path.join(self.path, filename)
         vframes, _, _ = read_video(
             video_full_path, pts_unit="sec", start_pts=0, end_pts=5
         )  # TODO fix hardcode
-        vframes = vframes[::5]  # TODO fix hardcode
-        # transforms
+        vframes = vframes[::5]  # TODO fix hardcode, add clipper
         vframes = vframes.permute(0, 3, 1, 2)
         vframes = vframes.type(torch.float64)
+        return vframes
+
+    def __getitem__(self, idx):
+        filename = self.video_paths[idx]
+        label = self.labels[filename]
+        if self.cache.cached.get(filename):
+            vframes = self.cache.get(filename)
+            return vframes, torch.tensor(label)
+        vframes = self._get_frames_tensor(filename)
         n, c, _, _ = vframes.shape
         transformed_frames = torch.empty(n, c, IMAGE_SIZE, IMAGE_SIZE)
         for i, frame in enumerate(vframes):
             transformed_frames[i] = default_transform(frame)
+        self.cache.save(filename, transformed_frames)
         return transformed_frames, torch.tensor(label)
 
 
-def get_dataset(data_path, n_workres):
+def get_dataset(data_path, n_workres, use_old_cache):
     print("reading data from: ", data_path)
     # metadata_path = os.path.join(data_path, "metadata.json")
     # metadata = utils.load_json(metadata_path)
@@ -96,7 +135,7 @@ def get_dataset(data_path, n_workres):
 
     # dataset = WrapDataset(video_ds, transform=default_transform, n_workres=n_workres)
     # return dataset
-    ds = VideoDataset(path=data_path)
+    ds = VideoDataset(path=data_path, use_old_cache=use_old_cache)
     return ds
 
 
