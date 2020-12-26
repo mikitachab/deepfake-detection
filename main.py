@@ -29,6 +29,7 @@ def main(args):
 
     learner = SGDLearner(model=model, dataset=dataset, device=device)
     learner.fit(args.epochs)
+    print("score", learner.score_dataset())
 
 
 if __name__ == "__main__":

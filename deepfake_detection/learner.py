@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import torch.optim as optim
 
+from sklearn.metrics import accuracy_score
 from tqdm import tqdm
 
 
@@ -34,3 +35,19 @@ class SGDLearner:
     def predict(self, t):
         self.model.eval()
         return self.model(t)
+
+    def score_dataset(self):
+        device = "cpu"
+        model = self.model.to(device)
+        model.eval()
+        print("computing accuracy on dataset")
+        y_true = []
+        y_pred = []
+        with tqdm(total=len(self.dataset)) as pb:
+            for i, (x, y) in enumerate(self.dataset):
+                x, y = x.to(device), y.to(device)
+                y_true.append(y.item())
+                pred = model(x)
+                y_pred.append(torch.argmax(pred).item())
+                pb.update(1)
+        return accuracy_score(y_true, y_pred)
