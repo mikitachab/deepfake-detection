@@ -37,7 +37,7 @@ class SGDLearner:
         return self.model(t)
 
     def score_dataset(self):
-        device = "cpu"
+        device = torch.device("cpu")
         model = self.model.to(device)
         model.eval()
         print("computing accuracy on dataset")

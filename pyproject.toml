@@ -7,10 +7,14 @@ version = "0.1.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
+scikit-image = "^0.18.1"
+sklearn = "^0.0"
 torch = "^1.7.1"
 torchvision = "^0.8.2"
+tqdm = "^4.55.0"
 
 [tool.poetry.dev-dependencies]
+black = "^20.8b1"
 
 [build-system]
 build-backend = "poetry.masonry.api"

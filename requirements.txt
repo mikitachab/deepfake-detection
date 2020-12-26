@@ -1,5 +1,0 @@
-pytorch
-torchvision
-scipy
-opencv-python
-scikit-image
