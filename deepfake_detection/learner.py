@@ -37,6 +37,10 @@ class SGDLearner:
         return self.model(t)
 
     def score_dataset(self):
+        """
+        Note: due to memory allocation issue while evaluation,
+        score compution on cpu
+        """
         device = torch.device("cpu")
         model = self.model.to(device)
         model.eval()

@@ -25,7 +25,7 @@ def main(args):
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     dataset = get_dataset(args.data_path, args.jobs, args.use_old_cache)
-    model = RCNN().to(device)
+    model = RCNN()
 
     learner = SGDLearner(model=model, dataset=dataset, device=device)
     learner.fit(args.epochs)
