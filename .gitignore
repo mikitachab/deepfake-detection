@@ -5,3 +5,4 @@ deepfake-detection-challenge.zip
 venv
 dfdc_train_*
 lintel
+sandbox.py
