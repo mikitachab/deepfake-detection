@@ -1,4 +1,5 @@
 import os
+import shutil
 import concurrent.futures
 import multiprocessing as mp
 
@@ -25,6 +26,7 @@ class VideoDataCache:
         if use_old:
             self.cached = self._get_prepopulated_cached()
         else:
+            shutil.rmtree(self.cache_path, ignore_errors=True)
             os.makedirs(self.cache_path, exist_ok=True)
 
     def _get_prepopulated_cached(self):
