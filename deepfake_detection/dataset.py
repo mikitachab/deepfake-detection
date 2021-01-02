@@ -69,7 +69,7 @@ class VideoDataset(Dataset):
             transforms = self.default_transform
         self.transforms = transforms
         self.video_paths = self._get_video_paths()
-        self.labels = self._load_labels(metadata_filename)
+        self.labels_map = self._load_labels(metadata_filename)
         self.cache = VideoDataCache("data/cache", use_old_cache)  # TODO fix hardcode
 
     def _load_labels(self, metadata_filename):
@@ -96,7 +96,7 @@ class VideoDataset(Dataset):
 
     def __getitem__(self, idx):
         filename = self.video_paths[idx]
-        label = self.labels[filename]
+        label = self.labels_map[filename]
         if self.cache.cached.get(filename):
             vframes = self.cache.get(filename)
             return vframes, torch.tensor(label)
@@ -107,6 +107,10 @@ class VideoDataset(Dataset):
             transformed_frames[i] = self.transforms(frame)
         self.cache.save(filename, transformed_frames)
         return transformed_frames, torch.tensor(label)
+
+    @property
+    def labels(self):
+        return torch.tensor([self.labels_map[path] for path in self.video_paths])
 
 
 def get_dataset(data_path, n_workres, use_old_cache):

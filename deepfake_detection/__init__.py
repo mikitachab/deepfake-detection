@@ -1,5 +1,6 @@
-__all__ = ["get_dataset", "RCNN", "SGDLearner", "VideoDataset"]
+__all__ = ["get_dataset", "RCNN", "SGDLearner", "VideoDataset", "VideoDatasetCV"]
 
 from .dataset import get_dataset, VideoDataset
 from .rcnn import RCNN
 from .learner import SGDLearner
+from .cross_validation import VideoDatasetCV

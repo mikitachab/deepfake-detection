@@ -1,9 +1,11 @@
 import torch
 from torch import nn
 import torch.optim as optim
+from torch.utils.data import Subset
 
 from sklearn.metrics import accuracy_score
 from tqdm import tqdm
+from .rcnn import RCNN
 
 
 class SGDLearner:
@@ -37,6 +39,9 @@ class SGDLearner:
         return self.model(t)
 
     def score_dataset(self):
+        return self.score(self.dataset)
+
+    def score(self, dataset):
         """
         Note: due to memory allocation issue while evaluation,
         score compution on cpu
