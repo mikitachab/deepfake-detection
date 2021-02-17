@@ -1,11 +1,9 @@
 import torch
 from torch import nn
 import torch.optim as optim
-from torch.utils.data import Subset
 
 from sklearn.metrics import accuracy_score
 from tqdm import tqdm
-from .rcnn import RCNN
 
 
 class SGDLearner:
@@ -52,8 +50,8 @@ class SGDLearner:
         print("computing accuracy on dataset")
         y_true = []
         y_pred = []
-        with tqdm(total=len(self.dataset)) as pb:
-            for i, (x, y) in enumerate(self.dataset):
+        with tqdm(total=len(dataset)) as pb:
+            for x, y in dataset:
                 x, y = x.to(device), y.to(device)
                 y_true.append(y.item())
                 pred = model(x)

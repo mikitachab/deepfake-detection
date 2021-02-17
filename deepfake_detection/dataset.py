@@ -1,21 +1,17 @@
 import os
 import shutil
-import concurrent.futures
-import multiprocessing as mp
 
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms as T
 from torchvision.io import read_video
 
-from deepfake_detection.constants import N_FRAMES, LABEL_MAP, IMAGE_SIZE
+from deepfake_detection.constants import LABEL_MAP, IMAGE_SIZE
 from deepfake_detection import utils
 from deepfake_detection.preprocessing import (
-    FaceExtract,
     FaceExtractMTCNN,
     EqualizeHistogram,
     UnsharpMask,
-    ToImage,
 )
 
 
@@ -63,7 +59,7 @@ class VideoDataset(Dataset):
     ):
         self.path = path
         if file_filter is None:
-            file_filter = lambda x: x.endswith(".mp4")
+            file_filter = _default_file_filter
         self.file_filter = file_filter
         if transforms is None:
             transforms = self.default_transform
@@ -111,6 +107,10 @@ class VideoDataset(Dataset):
     @property
     def labels(self):
         return torch.tensor([self.labels_map[path] for path in self.video_paths])
+
+
+def _default_file_filter(filename):
+    return filename.endswith(".mp4")
 
 
 def get_dataset(data_path, n_workres, use_old_cache):

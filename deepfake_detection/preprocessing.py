@@ -25,7 +25,7 @@ class FaceExtract:
             return image
         (x, y, w, h) = patch_to_tuple(detected[0])
         p = self.padding
-        cropped_face = image[y - p + 1 : y + h + p, x - p + 1 : x + w + p]
+        cropped_face = image[y - p + 1 : y + h + p, x - p + 1 : x + w + p]  # noqa
         if not validate_shape(cropped_face.shape):
             return image
         return cropped_face

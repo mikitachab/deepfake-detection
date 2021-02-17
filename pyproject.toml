@@ -16,6 +16,7 @@ av = "^8.0.2"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
+flake8 = "^3.8.4"
 
 [build-system]
 build-backend = "poetry.masonry.api"

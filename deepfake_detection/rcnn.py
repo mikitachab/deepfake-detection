@@ -11,6 +11,9 @@ class RCNN(nn.Module):
 
     def __init__(self, num_classes=2, rnn_hidden_size=128, rnn_num_layers=2, cnn=None):
         super(RCNN, self).__init__()
+        self.num_classes = num_classes
+        self.rnn_hidden_size = rnn_hidden_size
+        self.rnn_num_layers = rnn_num_layers
         if cnn is None:
             cnn = torchvision.models.resnet18(pretrained=True)
         self.cnn = cnn
@@ -19,6 +22,7 @@ class RCNN(nn.Module):
         self.lstm = nn.LSTM(
             n_features, rnn_hidden_size, rnn_num_layers, batch_first=True
         )
+
         self.fc = nn.Linear(rnn_hidden_size, num_classes)
 
     def forward(self, x):
@@ -32,3 +36,14 @@ class RCNN(nn.Module):
         fc_out = self.fc(fc_in)
         out = F.softmax(fc_out, dim=1)
         return out
+
+    def new_model(self):
+        return RCNN(**self.get_own_properties())
+
+    def get_own_properties(self):
+        return dict(
+            num_classes=self.num_classes,
+            rnn_hidden_size=self.rnn_hidden_size,
+            rnn_num_layers=self.rnn_num_layers,
+            cnn=self.cnn,
+        )
