@@ -10,7 +10,35 @@ from deepfake_detection import (
     SGDLearner,
     VideoDatasetCV,
 )
+from deepfake_detection.cnn import get_cnn
 from deepfake_detection.cross_validation import cross_val_score
+
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+
+def main(args):
+    dataset = get_dataset(args.data_path, args.jobs, args.no_cache)
+    model = RCNN(cnn=get_cnn(args.cnn))
+
+    if args.fit_and_score:
+        print(f"performing fit and score for {args.epochs} epochs")
+        fit_and_score(model, dataset, args.epochs)
+
+    if args.cv:
+        print("cross val")
+        cross_val(model, dataset)
+
+
+def cross_val(model, dataset):
+    cv = VideoDatasetCV(KFold(n_splits=2))
+    scores = cross_val_score(cv, model, dataset, device)
+    print(scores)
+
+
+def fit_and_score(model, dataset, epochs):
+    learner = SGDLearner(model=model, dataset=dataset, device=device)
+    learner.fit(epochs)
+    print("score", learner.score_dataset())
 
 
 def argparse_setup():
@@ -24,25 +52,11 @@ def argparse_setup():
     )
     parser.add_argument("--jobs", "-j", default=10, type=int)
     parser.add_argument("--epochs", "-e", default=1, type=int)
-    parser.add_argument("--use-old-cache", default=False, action="store_true")
+    parser.add_argument("--no-cache", action="store_true")
+    parser.add_argument("--fit-and-score", action="store_true")
+    parser.add_argument("--cv", action="store_true")
+    parser.add_argument("--cnn", type=str, choices=["resnet18", "resnet34"], default="resnet18")
     return parser
-
-
-def main(args):
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-
-    dataset = get_dataset(args.data_path, args.jobs, args.use_old_cache)
-    model = RCNN()
-
-    learner = SGDLearner(model=model, dataset=dataset, device=device)
-    learner.fit(args.epochs)
-    print("score", learner.score_dataset())
-
-    print("cv")
-    cv = VideoDatasetCV(KFold(n_splits=2))
-    scores = learner.cross_val_score(cv)
-    scores = cross_val_score(cv=cv, model=model, dataset=dataset, device=device)
-    print(scores)
 
 
 if __name__ == "__main__":

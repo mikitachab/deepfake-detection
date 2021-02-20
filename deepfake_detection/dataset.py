@@ -15,32 +15,6 @@ from deepfake_detection.preprocessing import (
 )
 
 
-class VideoDataCache:
-    def __init__(self, cache_path, use_old):
-        self.cache_path = cache_path
-        self.cached = {}
-        if use_old:
-            self.cached = self._get_prepopulated_cached()
-        else:
-            shutil.rmtree(self.cache_path, ignore_errors=True)
-            os.makedirs(self.cache_path, exist_ok=True)
-
-    def _get_prepopulated_cached(self):
-        return {filename: True for filename in os.listdir(self.cache_path)}
-
-    def get(self, filename):
-        if self.cached.get(filename):
-            full_path = os.path.join(self.cache_path, filename)
-            return torch.load(full_path)
-        return None
-
-    def save(self, filename, tensor):
-        if not self.cached.get(filename):
-            full_path = os.path.join(self.cache_path, filename)
-            torch.save(tensor, full_path)
-            self.cached[filename] = True
-
-
 class VideoDataset(Dataset):
     default_transform = T.Compose(
         [
@@ -52,7 +26,7 @@ class VideoDataset(Dataset):
     def __init__(
         self,
         path,
-        use_old_cache,
+        no_cache,
         transforms=None,
         metadata_filename="metadata.json",
         file_filter=None,
@@ -66,7 +40,7 @@ class VideoDataset(Dataset):
         self.transforms = transforms
         self.video_paths = self._get_video_paths()
         self.labels_map = self._load_labels(metadata_filename)
-        self.cache = VideoDataCache("data/cache", use_old_cache)  # TODO fix hardcode
+        self.cache = VideoDataCache("data/cache", no_cache)  # TODO fix hardcode
 
     def _load_labels(self, metadata_filename):
         metadata = utils.load_json(os.path.join(self.path, metadata_filename))
@@ -113,7 +87,33 @@ def _default_file_filter(filename):
     return filename.endswith(".mp4")
 
 
-def get_dataset(data_path, n_workres, use_old_cache):
+class VideoDataCache:
+    def __init__(self, cache_path, no_cache):
+        self.cache_path = cache_path
+        self.cached = {}
+        if no_cache:
+            shutil.rmtree(self.cache_path, ignore_errors=True)
+            os.makedirs(self.cache_path, exist_ok=True)
+        else:
+            self.cached = self._get_prepopulated_cached()
+
+    def _get_prepopulated_cached(self):
+        return {filename: True for filename in os.listdir(self.cache_path)}
+
+    def get(self, filename):
+        if self.cached.get(filename):
+            full_path = os.path.join(self.cache_path, filename)
+            return torch.load(full_path)
+        return None
+
+    def save(self, filename, tensor):
+        if not self.cached.get(filename):
+            full_path = os.path.join(self.cache_path, filename)
+            torch.save(tensor, full_path)
+            self.cached[filename] = True
+
+
+def get_dataset(data_path, n_workres, no_cache):
     print("reading data from: ", data_path)
     print("creating video dataset")
     device = torch.device("cuda")
@@ -128,7 +128,5 @@ def get_dataset(data_path, n_workres, use_old_cache):
         ]
     )
 
-    ds = VideoDataset(
-        path=data_path, use_old_cache=use_old_cache, transforms=transforms
-    )
+    ds = VideoDataset(path=data_path, no_cache=no_cache, transforms=transforms)
     return ds

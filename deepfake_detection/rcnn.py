@@ -9,7 +9,14 @@ class RCNN(nn.Module):
     stacks rnn on top of cnn
     """
 
-    def __init__(self, num_classes=2, rnn_hidden_size=128, rnn_num_layers=2, cnn=None):
+    def __init__(
+        self,
+        num_classes=2,
+        rnn_hidden_size=128,
+        rnn_num_layers=2,
+        cnn=None,
+        n_features=None,
+    ):
         super(RCNN, self).__init__()
         self.num_classes = num_classes
         self.rnn_hidden_size = rnn_hidden_size
@@ -17,7 +24,9 @@ class RCNN(nn.Module):
         if cnn is None:
             cnn = torchvision.models.resnet18(pretrained=True)
         self.cnn = cnn
-        n_features = self.cnn.fc.in_features
+        if n_features is None:
+            n_features = self.cnn.fc.in_features
+        self.n_features = n_features
         self.cnn.fc = nn.Identity()
         self.lstm = nn.LSTM(
             n_features, rnn_hidden_size, rnn_num_layers, batch_first=True
@@ -37,7 +46,7 @@ class RCNN(nn.Module):
         out = F.softmax(fc_out, dim=1)
         return out
 
-    def new_model(self):
+    def clone(self):
         return RCNN(**self.get_own_properties())
 
     def get_own_properties(self):
@@ -46,4 +55,5 @@ class RCNN(nn.Module):
             rnn_hidden_size=self.rnn_hidden_size,
             rnn_num_layers=self.rnn_num_layers,
             cnn=self.cnn,
+            n_features=self.n_features,
         )

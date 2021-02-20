@@ -14,6 +14,9 @@ class VideoDatasetCV:
         for train_index, test_index in self.cv.split(fake_x, y):
             yield train_index, test_index
 
+    def get_n_splits(self):
+        return self.cv.get_n_splits()
+
 
 def cross_val_score(cv, model, dataset, device):
     scores = []
@@ -23,7 +26,7 @@ def cross_val_score(cv, model, dataset, device):
         print("make substests")
         train_ds = Subset(dataset, train_index)
         test_ds = Subset(dataset, test_index)
-        model = model.new_model().to(device)
+        model = model.clone().to(device)
         print("train")
         # TODO how to setup? learner model should parameterized
         learner = SGDLearner(model=model, dataset=train_ds, device=device)
