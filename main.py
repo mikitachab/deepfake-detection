@@ -22,7 +22,7 @@ def main(args):
 
     if args.fit_and_score:
         print(f"performing fit and score for {args.epochs} epochs")
-        fit_and_score(model, dataset, args.epochs)
+        fit_and_score(model, dataset, args)
 
     if args.cv:
         print("cross val")
@@ -35,10 +35,13 @@ def cross_val(model, dataset):
     print(scores)
 
 
-def fit_and_score(model, dataset, epochs):
+def fit_and_score(model, dataset, args):
     learner = SGDLearner(model=model, dataset=dataset, device=device)
-    learner.fit(epochs)
+    learner.fit(args.epochs)
     print("score", learner.score_dataset())
+
+    if args.export:
+        learner.export(args.export_path)
 
 
 def argparse_setup():
@@ -55,7 +58,12 @@ def argparse_setup():
     parser.add_argument("--no-cache", action="store_true")
     parser.add_argument("--fit-and-score", action="store_true")
     parser.add_argument("--cv", action="store_true")
-    parser.add_argument("--cnn", type=str, choices=["resnet18", "resnet34"], default="resnet18")
+    parser.add_argument(
+        "--cnn", type=str, choices=["resnet18", "resnet34"], default="resnet18"
+    )
+    parser.add_argument("--export-path", type=str, default="export.pth")
+    parser.add_argument("--export", action="store_true")
+
     return parser
 
 

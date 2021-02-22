@@ -58,3 +58,6 @@ class SGDLearner:
                 y_pred.append(torch.argmax(pred).item())
                 pb.update(1)
         return accuracy_score(y_true, y_pred)
+
+    def export(self, path):
+        torch.save(self.model, path)

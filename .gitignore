@@ -6,3 +6,4 @@ venv
 dfdc_train_*
 lintel
 sandbox.py
+export.pth
