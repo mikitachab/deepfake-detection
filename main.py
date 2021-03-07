@@ -17,7 +17,7 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 
 
 def main(args):
-    dataset = get_dataset(args.data_path, args.jobs, args.no_cache)
+    dataset = get_dataset(args)
     model = RCNN(cnn=get_cnn(args.cnn))
 
     if args.fit_and_score:
@@ -63,6 +63,7 @@ def argparse_setup():
     )
     parser.add_argument("--export-path", type=str, default="export.pth")
     parser.add_argument("--export", action="store_true")
+    parser.add_argument("--no-preprocessing", action="store_true")
 
     return parser
 

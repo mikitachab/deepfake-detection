@@ -13,6 +13,7 @@ from deepfake_detection.preprocessing import (
     EqualizeHistogram,
     UnsharpMask,
 )
+from deepfake_detection.video_loader import Video2TensorLoader
 
 
 class VideoDataset(Dataset):
@@ -40,6 +41,7 @@ class VideoDataset(Dataset):
         self.transforms = transforms
         self.video_paths = self._get_video_paths()
         self.labels_map = self._load_labels(metadata_filename)
+        self.video_loader = Video2TensorLoader(self.path, self.transforms)
         self.cache = VideoDataCache("data/cache", no_cache)  # TODO fix hardcode
 
     def _load_labels(self, metadata_filename):
@@ -70,11 +72,9 @@ class VideoDataset(Dataset):
         if self.cache.cached.get(filename):
             vframes = self.cache.get(filename)
             return vframes, torch.tensor(label)
-        vframes = self._get_frames_tensor(filename)
-        n, c, _, _ = vframes.shape
-        transformed_frames = torch.empty(n, c, IMAGE_SIZE, IMAGE_SIZE)
-        for i, frame in enumerate(vframes):
-            transformed_frames[i] = self.transforms(frame)
+
+        transformed_frames = self.video_loader.load(filename)
+
         self.cache.save(filename, transformed_frames)
         return transformed_frames, torch.tensor(label)
 
@@ -94,6 +94,7 @@ class VideoDataCache:
         if no_cache:
             shutil.rmtree(self.cache_path, ignore_errors=True)
             os.makedirs(self.cache_path, exist_ok=True)
+            print("cached cleared")
         else:
             self.cached = self._get_prepopulated_cached()
 
@@ -113,20 +114,26 @@ class VideoDataCache:
             self.cached[filename] = True
 
 
-def get_dataset(data_path, n_workres, no_cache):
-    print("reading data from: ", data_path)
+def get_dataset(args):
+    print("reading data from: ", args.data_path)
     print("creating video dataset")
     device = torch.device("cuda")
 
-    transforms = T.Compose(
-        [
-            FaceExtractMTCNN(device=device),
-            T.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-            UnsharpMask(device=device),
-            EqualizeHistogram(device=device),
-            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
+    transforms = (
+        None
+        if args.no_preprocessing
+        else T.Compose(
+            [
+                FaceExtractMTCNN(device=device),
+                T.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+                UnsharpMask(device=device),
+                EqualizeHistogram(device=device),
+                T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ]
+        )
     )
 
-    ds = VideoDataset(path=data_path, no_cache=no_cache, transforms=transforms)
+    ds = VideoDataset(
+        path=args.data_path, no_cache=args.no_cache, transforms=transforms
+    )
     return ds
