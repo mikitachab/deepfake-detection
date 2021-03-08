@@ -22,7 +22,7 @@ def cross_val_score(cv, model, dataset, device):
     scores = []
     n_splits = cv.get_n_splits()
     for i, (train_index, test_index) in enumerate(cv.split(dataset), 1):
-        print(f"split {i}/{n_splits}")
+        print("split {i}/{n_splits}".format(i=i, n_splits=n_splits))
         print("make substests")
         train_ds = Subset(dataset, train_index)
         test_ds = Subset(dataset, test_index)

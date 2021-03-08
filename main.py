@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import argparse
 
@@ -21,7 +22,7 @@ def main(args):
     model = RCNN(cnn=get_cnn(args.cnn))
 
     if args.fit_and_score:
-        print(f"performing fit and score for {args.epochs} epochs")
+        print("performing fit and score for {} epochs".format(args.epochs))
         fit_and_score(model, dataset, args)
 
     if args.cv:

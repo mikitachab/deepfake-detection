@@ -4,39 +4,15 @@ import contextlib
 import tempfile
 
 import torch
-from torchvision import transforms as T
 import streamlit as st
 
 from deepfake_detection.video_loader import Video2TensorLoader
-from deepfake_detection.constants import LABEL_MAP
-from deepfake_detection.preprocessing import (
-    FaceExtractMTCNN,
-    EqualizeHistogram,
-    UnsharpMask,
-)
+from deepfake_detection.constants import LABEL_MAP, IMAGE_SIZE
+from deepfake_detection.transforms import preprocessing_pipeline
 
-IMAGE_SIZE = 224
-device = "cpu"
 
 st.set_option("deprecation.showfileUploaderEncoding", False)
-
-default_transform = T.Compose(
-    [
-        T.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ]
-)
-
-
-transforms = T.Compose(
-    [
-        FaceExtractMTCNN(device=device),
-        T.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-        UnsharpMask(device=device),
-        EqualizeHistogram(device=device),
-        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ]
-)
+device = "cpu"
 
 
 @st.cache(allow_output_mutation=True)
@@ -73,6 +49,7 @@ def main():
     if uploaded_file:
         with tempfile_with_content(uploaded_file.getvalue()) as file:
             with st.spinner("file"):
+                transforms = preprocessing_pipeline(device)
                 loader = Video2TensorLoader(transforms=transforms)
                 input_tensor = loader.load(file)
 

@@ -14,6 +14,7 @@ from deepfake_detection.preprocessing import (
     UnsharpMask,
 )
 from deepfake_detection.video_loader import Video2TensorLoader
+from deepfake_detection.transforms import preprocessing_pipeline, default_transform
 
 
 class VideoDataset(Dataset):
@@ -120,17 +121,7 @@ def get_dataset(args):
     device = torch.device("cuda")
 
     transforms = (
-        None
-        if args.no_preprocessing
-        else T.Compose(
-            [
-                FaceExtractMTCNN(device=device),
-                T.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-                UnsharpMask(device=device),
-                EqualizeHistogram(device=device),
-                T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            ]
-        )
+        default_transform if args.no_preprocessing else preprocessing_pipeline(device)
     )
 
     ds = VideoDataset(
