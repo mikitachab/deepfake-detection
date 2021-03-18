@@ -54,17 +54,24 @@ def argparse_setup():
         type=str,
         dest="data_path",
     )
-    parser.add_argument("--jobs", "-j", default=10, type=int)
-    parser.add_argument("--epochs", "-e", default=1, type=int)
-    parser.add_argument("--no-cache", action="store_true")
-    parser.add_argument("--fit-and-score", action="store_true")
-    parser.add_argument("--cv", action="store_true")
+    parser.add_argument("--epochs", "-e", default=1, type=int,
+        help="Number of epochs")
+    parser.add_argument("--no-cache", action="store_true",
+        help="not using data prom previous run")
+    parser.add_argument("--fit-and-score", action="store_true",
+        help="fit model and compute train score")
+    parser.add_argument("--cv", action="store_true", 
+        help="run cross validation")
     parser.add_argument(
-        "--cnn", type=str, choices=["resnet18", "resnet34"], default="resnet18"
+        "--cnn", type=str, choices=["resnet18", "resnet34"], default="resnet18",
+        help="Set used cnn"
     )
-    parser.add_argument("--export-path", type=str, default="export.pth")
-    parser.add_argument("--export", action="store_true")
-    parser.add_argument("--no-preprocessing", action="store_true")
+    parser.add_argument("--export-path", type=str, default="export.pth",
+        help="filename where to save model")
+    parser.add_argument("--export", action="store_true",
+        help="set to save trained model")
+    parser.add_argument("--no-preprocessing", action="store_true",
+        help="not using preprocessing pipeline")
 
     return parser
 
