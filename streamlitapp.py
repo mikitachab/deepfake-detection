@@ -1,4 +1,4 @@
-import io
+ import io
 import os
 import contextlib
 import tempfile
@@ -8,12 +8,16 @@ import streamlit as st
 
 from deepfake_detection.video_loader import Video2TensorLoader
 from deepfake_detection.constants import LABEL_MAP, IMAGE_SIZE
-from deepfake_detection.transforms import preprocessing_pipeline
+from deepfake_detection.transforms import preprocessing_pipeline, default_transform
 
 
 st.set_option("deprecation.showfileUploaderEncoding", False)
 device = "cpu"
 
+transforms_map = {
+    "default": default_transform, 
+    "preprocessing pipeline": preprocessing_pipeline(device=device)
+}
 
 @st.cache(allow_output_mutation=True)
 def load_model():
@@ -45,11 +49,13 @@ def main():
 
     st.title("DeepFake detection")
 
+    selected_tfms = st.selectbox("Preprocessing type", list(transforms_map.keys()))
+    transforms = transforms_map[selected_tfms]
+
     uploaded_file = st.file_uploader("Select video to upload")
     if uploaded_file:
         with tempfile_with_content(uploaded_file.getvalue()) as file:
             with st.spinner("file"):
-                transforms = preprocessing_pipeline(device)
                 loader = Video2TensorLoader(transforms=transforms)
                 input_tensor = loader.load(file)
 

@@ -1,35 +1,7 @@
 import torch
 import torchvision.transforms as T
 import numpy as np
-import skimage as ski
-from skimage import feature
 from facenet_pytorch import MTCNN
-
-
-class FaceExtract:
-    def __init__(self, padding=10):
-        self.padding = padding
-
-    def __call__(self, image):
-        trained_file = ski.data.lbp_frontal_face_cascade_filename()
-        face_detector = feature.Cascade(trained_file)
-        detected = face_detector.detect_multi_scale(
-            img=image,
-            scale_factor=1.2,
-            step_ratio=1,
-            min_size=(30, 30),
-            max_size=(224, 224),
-            min_neighbour_number=5,
-        )
-        if len(detected) == 0:
-            return image
-        (x, y, w, h) = patch_to_tuple(detected[0])
-        p = self.padding
-        cropped_face = image[y - p + 1 : y + h + p, x - p + 1 : x + w + p]  # noqa
-        if not validate_shape(cropped_face.shape):
-            return image
-        return cropped_face
-
 
 def patch_to_tuple(patch):
     return patch["c"], patch["r"], patch["width"], patch["height"]
