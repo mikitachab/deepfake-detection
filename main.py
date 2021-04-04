@@ -19,7 +19,7 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 
 def main(args):
     dataset = get_dataset(args)
-    model = RCNN(cnn=get_cnn(args.cnn))
+    model = RCNN(cnn=get_cnn(args.cnn), rnn_hidden_size=args.rnn_hidden_size, rnn_num_layers=args.rnn_num_layers)
 
     if args.fit_and_score:
         print("performing fit and score for {} epochs".format(args.epochs))
@@ -31,15 +31,16 @@ def main(args):
 
 
 def cross_val(model, dataset):
-    cv = VideoDatasetCV(KFold(n_splits=2))
+    cv = VideoDatasetCV(KFold(n_splits=5))
     scores = cross_val_score(cv, model, dataset, device)
     print(scores)
 
 
 def fit_and_score(model, dataset, args):
     learner = SGDLearner(model=model, dataset=dataset, device=device)
-    learner.fit(args.epochs)
-    print("score", learner.score_dataset())
+    s = learner.fit(args.epochs)
+    # print("score", learner.score_dataset())
+    print(s)
 
     if args.export:
         learner.export(args.export_path)
@@ -72,6 +73,11 @@ def argparse_setup():
         help="set to save trained model")
     parser.add_argument("--no-preprocessing", action="store_true",
         help="not using preprocessing pipeline")
+    parser.add_argument("--cache-dir", "-c", type=str,
+        help="cache directory")
+    parser.add_argument("--rnn-hidden-size", type=int, default=128)
+    parser.add_argument("--rnn-num-layers", type=int, default=2)
+    parser.add_argument("--data-limit", type=int, default=None)
 
     return parser
 

@@ -32,6 +32,8 @@ class VideoDataset(Dataset):
         transforms=None,
         metadata_filename="metadata.json",
         file_filter=None,
+        cache_dir=None,
+        limit=None,
     ):
         self.path = path
         if file_filter is None:
@@ -43,7 +45,10 @@ class VideoDataset(Dataset):
         self.video_paths = self._get_video_paths()
         self.labels_map = self._load_labels(metadata_filename)
         self.video_loader = Video2TensorLoader(self.path, self.transforms)
-        self.cache = VideoDataCache("data/cache", no_cache)  # TODO fix hardcode
+        self.cache = VideoDataCache(
+            cache_dir or "data/cache", no_cache
+        )  # TODO fix hardcode
+        self.limit = limit
 
     def _load_labels(self, metadata_filename):
         metadata = utils.load_json(os.path.join(self.path, metadata_filename))
@@ -55,6 +60,8 @@ class VideoDataset(Dataset):
         return [file for file in os.listdir(self.path) if self.file_filter(file)]
 
     def __len__(self):
+        if self.limit is not None:
+            return min(len(self.video_paths), self.limit)
         return len(self.video_paths)
 
     def _get_frames_tensor(self, filename):
@@ -68,6 +75,8 @@ class VideoDataset(Dataset):
         return vframes
 
     def __getitem__(self, idx):
+        if self.limit is not None and idx >= len(self):
+            raise StopIteration
         filename = self.video_paths[idx]
         label = self.labels_map[filename]
         if self.cache.cached.get(filename):
@@ -125,6 +134,10 @@ def get_dataset(args):
     )
 
     ds = VideoDataset(
-        path=args.data_path, no_cache=args.no_cache, transforms=transforms
+        path=args.data_path,
+        no_cache=args.no_cache,
+        transforms=transforms,
+        cache_dir=args.cache_dir,
+        limit=args.data_limit,
     )
     return ds

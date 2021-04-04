@@ -30,7 +30,7 @@ def cross_val_score(cv, model, dataset, device):
         print("train")
         # TODO how to setup? learner model should parameterized
         learner = SGDLearner(model=model, dataset=train_ds, device=device)
-        learner.fit(1)
+        learner.fit(2)
         print("test")
         score = learner.score(test_ds)
         scores.append(score)

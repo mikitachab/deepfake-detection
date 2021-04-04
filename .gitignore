@@ -7,3 +7,5 @@ dfdc_train_*
 lintel
 sandbox.py
 export.pth
+metadata.json
+preprocessed_data/

@@ -7,7 +7,14 @@ from tqdm import tqdm
 
 
 class SGDLearner:
-    def __init__(self, model, dataset, loss_func=nn.CrossEntropyLoss(), device="cpu"):
+    def __init__(
+        self,
+        model,
+        dataset,
+        loss_func=nn.CrossEntropyLoss(),
+        device="cpu",
+        data_limit=None,
+    ):
         self.dataset = dataset
         self.device = device
         self.loss_func = loss_func
@@ -16,6 +23,7 @@ class SGDLearner:
 
     def fit(self, epochs=1):
         self.model.train()
+        epochs_loss = []
         for e in range(epochs):
             print("e =", e + 1)
             running_loss = 0.0
@@ -30,7 +38,9 @@ class SGDLearner:
                     self.optimizer.step()
                     running_loss += loss.item()
                     pb.update(1)
-                print("loss = ", loss.item())
+                print("loss = ", running_loss)
+            epochs_loss.append(running_loss)
+        return epochs_loss
 
     def predict(self, t):
         self.model.eval()

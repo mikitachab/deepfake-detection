@@ -3,6 +3,7 @@ import torchvision.transforms as T
 import numpy as np
 from facenet_pytorch import MTCNN
 
+
 def patch_to_tuple(patch):
     return patch["c"], patch["r"], patch["width"], patch["height"]
 
