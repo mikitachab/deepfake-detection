@@ -27,12 +27,12 @@ def main(args):
 
     if args.cv:
         print("cross val")
-        cross_val(model, dataset)
+        cross_val(model, dataset, epochs=args.epochs)
 
 
-def cross_val(model, dataset):
+def cross_val(model, dataset,epochs):
     cv = VideoDatasetCV(KFold(n_splits=5))
-    scores = cross_val_score(cv, model, dataset, device)
+    scores = cross_val_score(cv, model, dataset, device, epochs)
     print(scores)
 
 

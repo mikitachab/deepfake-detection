@@ -18,7 +18,7 @@ class VideoDatasetCV:
         return self.cv.get_n_splits()
 
 
-def cross_val_score(cv, model, dataset, device):
+def cross_val_score(cv, model, dataset, device, epochs):
     scores = []
     n_splits = cv.get_n_splits()
     for i, (train_index, test_index) in enumerate(cv.split(dataset), 1):
@@ -30,7 +30,7 @@ def cross_val_score(cv, model, dataset, device):
         print("train")
         # TODO how to setup? learner model should parameterized
         learner = SGDLearner(model=model, dataset=train_ds, device=device)
-        learner.fit(2)
+        learner.fit(epochs)
         print("test")
         score = learner.score(test_ds)
         scores.append(score)
