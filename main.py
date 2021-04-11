@@ -17,7 +17,12 @@ from deepfake_detection.cross_validation import cross_val_score
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 
+
 def main(args):
+    if args.cpu:
+        global device
+        device = "cpu"
+
     dataset = get_dataset(args)
     model = RCNN(cnn=get_cnn(args.cnn), rnn_hidden_size=args.rnn_hidden_size, rnn_num_layers=args.rnn_num_layers)
 
@@ -64,7 +69,7 @@ def argparse_setup():
     parser.add_argument("--cv", action="store_true", 
         help="run cross validation")
     parser.add_argument(
-        "--cnn", type=str, choices=["resnet18", "resnet34"], default="resnet18",
+        "--cnn", type=str, choices=["resnet18", "resnet34", "resnet50", "vgg11", "vgg13", "vgg16"], default="resnet18",
         help="Set used cnn"
     )
     parser.add_argument("--export-path", type=str, default="export.pth",
@@ -78,6 +83,7 @@ def argparse_setup():
     parser.add_argument("--rnn-hidden-size", type=int, default=128)
     parser.add_argument("--rnn-num-layers", type=int, default=2)
     parser.add_argument("--data-limit", type=int, default=None)
+    parser.add_argument("--cpu", action="store_true")
 
     return parser
 

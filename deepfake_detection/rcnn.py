@@ -21,13 +21,22 @@ class RCNN(nn.Module):
         self.num_classes = num_classes
         self.rnn_hidden_size = rnn_hidden_size
         self.rnn_num_layers = rnn_num_layers
+
         if cnn is None:
             cnn = torchvision.models.resnet18(pretrained=True)
         self.cnn = cnn
         if n_features is None:
-            n_features = self.cnn.fc.in_features
+            if self.cnn.__class__.__name__ == "VGG":
+                n_features = self.cnn.classifier[0].in_features
+            if self.cnn.__class__.__name__ == "ResNet":
+                n_features = self.cnn.fc.in_features
         self.n_features = n_features
-        self.cnn.fc = nn.Identity()
+        if self.cnn.__class__.__name__ == "VGG":
+            self.cnn.classifier = nn.Identity()
+        if self.cnn.__class__.__name__ == "ResNet":
+            self.cnn.fc = nn.Identity()
+
+
         self.lstm = nn.LSTM(
             n_features, rnn_hidden_size, rnn_num_layers, batch_first=True
         )
