@@ -20,11 +20,10 @@ PREPROCESSED_DATA_DIR = "preprocessed_data"
 DATA_PATH = "data"
 
 DIRS = [
-    "dfdc_train_part_1",
+    "dfdc_train_part_3",
 ]
 
 def main():
-    
     with open("metadata.json") as f:
         metadata = json.load(f)
 

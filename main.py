@@ -26,6 +26,8 @@ def main(args):
     dataset = get_dataset(args)
     model = RCNN(cnn=get_cnn(args.cnn), rnn_hidden_size=args.rnn_hidden_size, rnn_num_layers=args.rnn_num_layers)
 
+    print("CNN: ", args.cnn)
+
     if args.fit_and_score:
         print("performing fit and score for {} epochs".format(args.epochs))
         fit_and_score(model, dataset, args)
@@ -36,9 +38,9 @@ def main(args):
 
 
 def cross_val(model, dataset,epochs):
-    cv = VideoDatasetCV(KFold(n_splits=5))
+    cv = VideoDatasetCV(KFold(n_splits=5, shuffle=True, random_state=1410))
     scores = cross_val_score(cv, model, dataset, device, epochs)
-    print(scores)
+    print(scores) # TODO save score to file instead of printing
 
 
 def fit_and_score(model, dataset, args):
