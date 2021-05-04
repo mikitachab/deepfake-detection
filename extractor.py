@@ -1,4 +1,4 @@
-
+import argparse
 import os
 import json
 
@@ -19,18 +19,25 @@ transforms_map = {
 PREPROCESSED_DATA_DIR = "preprocessed_data"
 DATA_PATH = "data"
 
-DIRS = [
-    "dfdc_train_part_3",
-]
+
+
+def get_meta():
+    if os.path.exists("metadata.json"):
+        with open("metadata.json") as f:
+            return json.load(f)
+    return {}
 
 def main():
-    with open("metadata.json") as f:
-        metadata = json.load(f)
+    metadata = get_meta()
 
     transforms = transforms_map["preprocessing"]
     loader = Video2TensorLoader(transforms=transforms)
 
-    for dir_ in DIRS:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dirs","-d", nargs="+")
+    args = parser.parse_args()
+
+    for dir_ in args.dirs:
         metadata_file = os.path.join(DATA_PATH, dir_, "metadata.json")
 
         with open(metadata_file) as file:
