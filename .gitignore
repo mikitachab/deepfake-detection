@@ -9,3 +9,4 @@ sandbox.py
 export.pth
 metadata.json
 preprocessed_data/
+.env
