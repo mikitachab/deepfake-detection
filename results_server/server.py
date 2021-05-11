@@ -2,7 +2,8 @@ import datetime
 from typing import List
 import os
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import mongoengine
 import dotenv
@@ -74,7 +75,11 @@ async def check_secret(request: Request, call_next):
     secret = request.headers.get("X-RESULTS-SECRET")
     if secret == RESULTS_SECRET:
         return await call_next(request)
-    raise HTTPException(status_code=400, detail="Who are you?")
+
+    return JSONResponse(
+        status_code=400,
+        content={"message": "Who are you?"},
+    )
 
 
 @app.post("/result", response_model=CVResultOut, status_code=201)
@@ -84,6 +89,6 @@ async def add_result(result: CVResult):
     return db_result.to_model()
 
 
-@app.get("/result", response_model=CVResults, status_code=201)
+@app.get("/result", response_model=CVResults, status_code=200)
 async def get_results():
     return CVResults(data=[r.to_model() for r in DBCVResult.objects.all()])
