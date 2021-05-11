@@ -4,6 +4,7 @@ import argparse
 
 import torch
 from sklearn.model_selection import KFold
+import requests
 
 from deepfake_detection import (
     get_dataset,
@@ -34,13 +35,38 @@ def main(args):
 
     if args.cv:
         print("cross val")
-        cross_val(model, dataset, epochs=args.epochs)
+        scores = cross_val(model, dataset, epochs=args.epochs)
+
+        if args.send_cv:
+            send_cv(args, scores)
+
+def send_cv(args, scores):
+    preprocessing = "preprocessing_pipeline"
+    if args.no_preprocessing:
+        preprocessing = "no_preprocessing"
+
+    data = {
+        "preprocessing": preprocessing,
+        "cnn": args.cnn,
+        "splits": scores
+    }
+
+    print("sending results")
+    print(data)
+
+    r = requests.post(args.db_url, json=data, headers={
+        "X-RESULTS-SECRET": os.getenv("RESULTS_SECRET")
+    })
+
+    print("response status", r.status_code)
+    print("response data", r.json())
 
 
 def cross_val(model, dataset,epochs):
     cv = VideoDatasetCV(KFold(n_splits=5, shuffle=True, random_state=1410))
     scores = cross_val_score(cv, model, dataset, device, epochs)
     print(scores) # TODO save score to file instead of printing
+    return scores
 
 
 def fit_and_score(model, dataset, args):
@@ -86,6 +112,9 @@ def argparse_setup():
     parser.add_argument("--rnn-num-layers", type=int, default=2)
     parser.add_argument("--data-limit", type=int, default=None)
     parser.add_argument("--cpu", action="store_true")
+    parser.add_argument("--send-cv", action="store_true")
+    parser.add_argument("--db-url", type=str)
+
 
     return parser
 
