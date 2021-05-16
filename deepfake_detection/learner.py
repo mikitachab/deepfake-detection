@@ -54,7 +54,7 @@ class SGDLearner:
         Note: due to memory allocation issue while evaluation,
         score compution on cpu
         """
-        device = torch.device("cpu")
+        device = torch.device("cuda")
         model = self.model.to(device)
         model.eval()
         print("computing accuracy on dataset")
