@@ -46,7 +46,7 @@ def main():
 
         for file in tqdm(os.listdir(os.path.join(DATA_PATH, dir_))):
             video_file = os.path.join(DATA_PATH, dir_, file)
-            if video_file.endswith(".mp4") and metadata[video_file]["label"] == "REAL":
+            if video_file.endswith(".mp4") and metadata[file]["label"] == "REAL":
                 loader = Video2TensorLoader(transforms=transforms)
                 t = loader.load(video_file)
                 torch.save(t, os.path.join(PREPROCESSED_DATA_DIR, video_file.split("/")[-1]))
