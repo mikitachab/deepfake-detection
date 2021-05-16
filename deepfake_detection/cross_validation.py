@@ -34,4 +34,5 @@ def cross_val_score(cv, model, dataset, device, epochs):
         print("test")
         score = learner.score(test_ds)
         scores.append(score)
+        print("score=", score)
     return scores
