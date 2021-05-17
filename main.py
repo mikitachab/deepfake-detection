@@ -48,7 +48,8 @@ def send_cv(args, scores):
     data = {
         "preprocessing": preprocessing,
         "cnn": args.cnn,
-        "splits": scores
+        "splits": scores,
+        "description": args.desc
     }
 
     print("sending results")
@@ -114,7 +115,7 @@ def argparse_setup():
     parser.add_argument("--cpu", action="store_true")
     parser.add_argument("--send-cv", action="store_true")
     parser.add_argument("--db-url", type=str)
-
+    parser.add_argument("--desc", type=str, default="")
 
     return parser
 
