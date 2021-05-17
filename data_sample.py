@@ -2,6 +2,8 @@ import argparse
 import json
 import os
 import shutil
+from tqdm import tqdm
+
 
 
 def all_by_label(metadata, files, label):
@@ -16,9 +18,11 @@ def main(args):
         metadata = json.load(f)
 
     files = [f for f in os.listdir(args.source) if f.endswith("mp4")]
-    for label in ["REAL", "FAKE"]:
-        for file in all_by_label(metadata, files, label)[:args.size]:
-            shutil.copyfile(os.path.join(args.source, file), os.path.join(args.dest, file))
+    with tqdm(total=args.size*2) as pb:
+        for label in ["REAL", "FAKE"]:
+            for file in all_by_label(metadata, files, label)[:args.size]:
+                shutil.copyfile(os.path.join(args.source, file), os.path.join(args.dest, file))
+                pb.update(1)
 
 
 if __name__ == "__main__":
