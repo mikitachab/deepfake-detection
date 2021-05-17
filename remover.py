@@ -4,7 +4,7 @@ import json
 import random
 
 def remove(metadata):
-    for _ in range(700):
+    for _ in range(100):
         files = os.listdir("preprocessed_data")
         file = random.choice(files)
         if metadata[file]["label"] == "FAKE":
@@ -21,7 +21,10 @@ def main(args):
             os.remove(os.path.join(args.dir, file))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dir", "-d", type=str)
-    args = parser.parse_args()
-    main(args)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--dir", "-d", type=str)
+    # args = parser.parse_args()
+    # main(args)
+    with open("metadata.json") as f:
+        metadata = json.load(f)
+    remove(metadata)

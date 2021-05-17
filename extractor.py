@@ -20,7 +20,6 @@ PREPROCESSED_DATA_DIR = "preprocessed_data"
 DATA_PATH = "data"
 
 
-
 def get_meta():
     if os.path.exists("metadata.json"):
         with open("metadata.json") as f:
@@ -29,13 +28,14 @@ def get_meta():
 
 def main():
     metadata = get_meta()
-
-    transforms = transforms_map["preprocessing"]
-    loader = Video2TensorLoader(transforms=transforms)
-
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("--dirs","-d", nargs="+")
+    parser.add_argument("--transforms", "-t", type=str, choices=["default", "preprocessing"], default="preprocessing")
     args = parser.parse_args()
+
+    transforms = transforms_map[args.transforms]
+    loader = Video2TensorLoader(transforms=transforms)
 
     for dir_ in args.dirs:
         metadata_file = os.path.join(DATA_PATH, dir_, "metadata.json")
@@ -46,7 +46,7 @@ def main():
 
         for file in tqdm(os.listdir(os.path.join(DATA_PATH, dir_))):
             video_file = os.path.join(DATA_PATH, dir_, file)
-            if video_file.endswith(".mp4") and metadata[file]["label"] == "REAL":
+            if video_file.endswith(".mp4"):
                 loader = Video2TensorLoader(transforms=transforms)
                 t = loader.load(video_file)
                 torch.save(t, os.path.join(PREPROCESSED_DATA_DIR, video_file.split("/")[-1]))
