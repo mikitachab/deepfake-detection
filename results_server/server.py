@@ -31,12 +31,10 @@ class CVResult(BaseModel):
     cnn: str
     splits: List[float]
     preprocessing: str
+    description: str
 
 
-class CVResultOut(BaseModel):
-    cnn: str
-    splits: List[float]
-    preprocessing: str
+class CVResultOut(CVResult):
     datetime: str
 
 
@@ -49,13 +47,17 @@ class DBCVResult(mongoengine.Document):
     splits = mongoengine.ListField(mongoengine.FloatField())
     cnn = mongoengine.StringField()
     preprocessing = mongoengine.StringField()
+    description = mongoengine.StringField()
 
     meta = {"collection": "results"}
 
     @staticmethod
     def from_model(result: CVResult):
         return DBCVResult(
-            splits=result.splits, cnn=result.cnn, preprocessing=result.preprocessing
+            splits=result.splits,
+            cnn=result.cnn,
+            preprocessing=result.preprocessing,
+            description=result.description,
         )
 
     def to_model(self):
@@ -64,6 +66,7 @@ class DBCVResult(mongoengine.Document):
             splits=self.splits,
             preprocessing=self.preprocessing,
             datetime=self.datetime.strftime("%m.%d.%Y, %H:%M:%S"),
+            description=self.description
         )
 
 

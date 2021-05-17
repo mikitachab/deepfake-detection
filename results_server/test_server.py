@@ -8,6 +8,7 @@ import server
 
 @pytest.fixture(autouse=True)
 def db_setup():
+    mongoengine.disconnect()
     db_name = "mongoenginetest"
     conn = mongoengine.connect(
         db=db_name, host="mongomock://localhost", alias="default"
@@ -36,6 +37,7 @@ def test_can_add_result(client, secret):
             "cnn": "resnet18",
             "preprocessing": "preprocessing_pipeline",
             "splits": [0.98, 0.97, 0.98, 0.97, 0.85],
+            "description": "first exp",
         },
         headers={"X-RESULTS-SECRET": secret},
     )
@@ -45,6 +47,8 @@ def test_can_add_result(client, secret):
     assert data["cnn"] == "resnet18"
     assert data["preprocessing"] == "preprocessing_pipeline"
     assert data["splits"] == [0.98, 0.97, 0.98, 0.97, 0.85]
+    assert data["description"] == "first exp"
+
     assert "datetime" in data.keys()
 
 
@@ -55,6 +59,8 @@ def test_can_get_results(client, secret):
             "cnn": "resnet18",
             "preprocessing": "preprocessing_pipeline",
             "splits": [0.98, 0.97, 0.98, 0.97, 0.85],
+            "description": "first exp",
+
         },
         headers={"X-RESULTS-SECRET": secret},
     )
@@ -65,13 +71,14 @@ def test_can_get_results(client, secret):
             "cnn": "resnet18",
             "preprocessing": "no_preprocessing",
             "splits": [0.98, 0.97, 0.98, 0.97, 0.85],
+            "description": "second exp",
         },
         headers={"X-RESULTS-SECRET": secret},
     )
     assert response.status_code == 201
     response = client.get("/result", headers={"X-RESULTS-SECRET": secret})
 
-    assert response.status_code == 201
+    assert response.status_code == 200
 
     data = response.json()["data"]
     assert len(data) == 2
