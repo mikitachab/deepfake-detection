@@ -27,7 +27,7 @@ class SGDLearner:
         for e in range(epochs):
             print("e =", e + 1)
             running_loss = 0.0
-            with tqdm(total=len(self.dataset)) as pb:
+            with tqdm(total=len(self.dataset), bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}") as pb:
                 for i, (x, y) in enumerate(self.dataset):
                     x, y = x.to(self.device), y.to(self.device)
                     y = torch.unsqueeze(y, 0)
@@ -60,7 +60,7 @@ class SGDLearner:
         print("computing accuracy on dataset")
         y_true = []
         y_pred = []
-        with tqdm(total=len(dataset)) as pb:
+        with tqdm(total=len(dataset), bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}") as pb:
             for x, y in dataset:
                 x, y = x.to(device), y.to(device)
                 y_true.append(y.item())
