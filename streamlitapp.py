@@ -1,4 +1,4 @@
- import io
+import io
 import os
 import contextlib
 import tempfile
@@ -55,11 +55,11 @@ def main():
     uploaded_file = st.file_uploader("Select video to upload")
     if uploaded_file:
         with tempfile_with_content(uploaded_file.getvalue()) as file:
-            with st.spinner("file"):
+            with st.spinner("preprocessing"):
                 loader = Video2TensorLoader(transforms=transforms)
                 input_tensor = loader.load(file)
 
-            with st.spinner("getting prediction"):
+            with st.spinner("predicting"):
                 result = model(input_tensor)
 
             label, conf = extract_prediction(result)

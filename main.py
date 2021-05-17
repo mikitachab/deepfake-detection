@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import argparse
+import random
 
 import torch
 from sklearn.model_selection import KFold
@@ -12,7 +13,6 @@ from deepfake_detection import (
     SGDLearner,
     VideoDatasetCV,
 )
-from deepfake_detection.cnn import get_cnn
 from deepfake_detection.cross_validation import cross_val_score
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -20,12 +20,15 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 
 
 def main(args):
+    random.seed(1410)
+    torch.manual_seed(1410)
+
     if args.cpu:
         global device
         device = "cpu"
 
     dataset = get_dataset(args)
-    model = RCNN(cnn=get_cnn(args.cnn), rnn_hidden_size=args.rnn_hidden_size, rnn_num_layers=args.rnn_num_layers)
+    model = RCNN(cnn=args.cnn, rnn_hidden_size=args.rnn_hidden_size, rnn_num_layers=args.rnn_num_layers)
 
     print("CNN: ", args.cnn)
 

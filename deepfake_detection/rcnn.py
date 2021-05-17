@@ -3,6 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 import torchvision
 
+from deepfake_detection.cnn import get_cnn
 
 class RCNN(nn.Module):
     """
@@ -14,7 +15,7 @@ class RCNN(nn.Module):
         num_classes=2,
         rnn_hidden_size=128,
         rnn_num_layers=2,
-        cnn=None,
+        cnn="resnet18",
         n_features=None,
     ):
         super(RCNN, self).__init__()
@@ -22,9 +23,8 @@ class RCNN(nn.Module):
         self.rnn_hidden_size = rnn_hidden_size
         self.rnn_num_layers = rnn_num_layers
 
-        if cnn is None:
-            cnn = torchvision.models.resnet18(pretrained=True)
-        self.cnn = cnn
+        self.cnn_name = cnn
+        self.cnn = get_cnn(cnn)
         if n_features is None:
             if self.cnn.__class__.__name__ == "VGG":
                 n_features = self.cnn.classifier[0].in_features
@@ -63,6 +63,6 @@ class RCNN(nn.Module):
             num_classes=self.num_classes,
             rnn_hidden_size=self.rnn_hidden_size,
             rnn_num_layers=self.rnn_num_layers,
-            cnn=self.cnn,
+            cnn=self.cnn_name,
             n_features=self.n_features,
         )
