@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 def main(args):
     with open("exp_files.txt") as f:
-        exp_files = [file.strip() for file in f.readlines()]
+        exp_files = [file.strip() for file in f.readlines() if file.endswith("mp4")]
 
     for file in tqdm(exp_files):
         source = os.path.join(args.source, file)
