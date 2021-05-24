@@ -112,10 +112,18 @@ def argparse_setup():
         help="not using preprocessing pipeline")
     parser.add_argument("--cache-dir", "-c", type=str,
         help="cache directory")
-    parser.add_argument("--rnn-hidden-size", type=int, default=128)
-    parser.add_argument("--rnn-num-layers", type=int, default=2)
-    parser.add_argument("--data-limit", type=int, default=None)
-    parser.add_argument("--cpu", action="store_true")
+    parser.add_argument("--rnn-hidden-size", type=int, default=128,
+        help="set LSTM hidden size"
+    )
+    parser.add_argument("--rnn-num-layers", type=int, default=2,
+        help="set number of layers for LSTM"
+    )
+    parser.add_argument("--data-limit", type=int, default=None,
+        help="set limit for observations in dataset"
+    )
+    parser.add_argument("--cpu", action="store_true",
+        help="perform all computations on cpu"
+    )
     parser.add_argument("--send-cv", action="store_true")
     parser.add_argument("--db-url", type=str)
     parser.add_argument("--desc", type=str, default="")
