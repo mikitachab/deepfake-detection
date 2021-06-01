@@ -4,7 +4,7 @@ import argparse
 import random
 
 import torch
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, StratifiedKFold
 import requests
 
 from deepfake_detection import (
@@ -70,7 +70,7 @@ def send_cv(args, scores):
 
 
 def cross_val(model, dataset, epochs, score_device):
-    cv = VideoDatasetCV(KFold(n_splits=5, shuffle=True, random_state=1410))
+    cv = VideoDatasetCV(StratifiedKFold(n_splits=5, shuffle=True, random_state=1410))
     scores = cross_val_score(cv, model, dataset, device, epochs, score_device)
     print(scores) # TODO save score to file instead of printing
     return scores
