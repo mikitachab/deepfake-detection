@@ -2,7 +2,11 @@ import torch
 from torch import nn
 import torch.optim as optim
 
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+)
 from tqdm import tqdm
 
 
@@ -28,19 +32,30 @@ class SGDLearner:
             print("e =", e + 1)
             running_loss = 0.0
             with tqdm(total=len(self.dataset), bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}") as pb:
+                ys = []
+                preds = []
                 for i, (x, y) in enumerate(self.dataset):
                     x, y = x.to(self.device), y.to(self.device)
                     y = torch.unsqueeze(y, 0)
                     self.optimizer.zero_grad()
                     pred = self.model(x)
+
                     loss = self.loss_func(pred, y)
                     loss.backward()
                     self.optimizer.step()
                     running_loss += loss.item()
+
+                    ys.append(y.item())
+                    preds.append(torch.argmax(pred).item())
+
                     pb.update(1)
                 print("loss = ", running_loss)
             epochs_loss.append(running_loss)
-        return epochs_loss
+
+        return {
+            "loss": epochs_loss,
+            "train_scores": make_scores(ys, preds)
+        }
 
     def predict(self, t):
         self.model.eval()
@@ -49,17 +64,16 @@ class SGDLearner:
     def score_dataset(self):
         return self.score(self.dataset)
 
-    def score(self, dataset):
+    def score(self, dataset, device):
         """
         Note: due to memory allocation issue while evaluation,
         score compution on cpu
         """
-        device = torch.device("cuda")
         model = self.model.to(device)
         model.eval()
-        print("computing accuracy on dataset")
         y_true = []
         y_pred = []
+        print("SGDLearner: computing accuracy on dataset")
         with tqdm(total=len(dataset), bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}") as pb:
             for x, y in dataset:
                 x, y = x.to(device), y.to(device)
@@ -67,7 +81,15 @@ class SGDLearner:
                 pred = model(x)
                 y_pred.append(torch.argmax(pred).item())
                 pb.update(1)
-        return accuracy_score(y_true, y_pred)
+        return make_scores(y_true, y_pred)
 
     def export(self, path):
         torch.save(self.model, path)
+
+
+def make_scores(y_true, y_pred):
+    return {
+        "accuracy": accuracy_score(y_true, y_pred),
+        "precision": precision_score(y_true, y_pred),
+        "recall": recall_score(y_true, y_pred),
+    }

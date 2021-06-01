@@ -31,6 +31,8 @@ def main(args):
     model = RCNN(cnn=args.cnn, rnn_hidden_size=args.rnn_hidden_size, rnn_num_layers=args.rnn_num_layers)
 
     print("CNN: ", args.cnn)
+    print("Train device", str(device))
+    print("Score device", args.score_device)
 
     if args.fit_and_score:
         print("performing fit and score for {} epochs".format(args.epochs))
@@ -38,7 +40,8 @@ def main(args):
 
     if args.cv:
         print("cross val")
-        scores = cross_val(model, dataset, epochs=args.epochs)
+        scores = cross_val(model, dataset, epochs=args.epochs, score_device=args.score_device)
+        print(scores)
 
         if args.send_cv:
             send_cv(args, scores)
@@ -66,9 +69,9 @@ def send_cv(args, scores):
     print("response data", r.json())
 
 
-def cross_val(model, dataset,epochs):
+def cross_val(model, dataset, epochs, score_device):
     cv = VideoDatasetCV(KFold(n_splits=5, shuffle=True, random_state=1410))
-    scores = cross_val_score(cv, model, dataset, device, epochs)
+    scores = cross_val_score(cv, model, dataset, device, epochs, score_device)
     print(scores) # TODO save score to file instead of printing
     return scores
 
@@ -123,6 +126,10 @@ def argparse_setup():
     )
     parser.add_argument("--cpu", action="store_true",
         help="perform all computations on cpu"
+    )
+    parser.add_argument("--score-device",
+        type=str, default="cpu", choices=["cpu", "cuda"],
+        help="set device for scoring"
     )
     parser.add_argument("--send-cv", action="store_true")
     parser.add_argument("--db-url", type=str)
