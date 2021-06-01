@@ -2,6 +2,7 @@
 import os
 import argparse
 import random
+import json
 
 import torch
 from sklearn.model_selection import KFold, StratifiedKFold
@@ -46,6 +47,25 @@ def main(args):
         if args.send_cv:
             send_cv(args, scores)
 
+        if args.save_cv:
+            save_cv_results(args, scores)
+
+
+def save_cv_results(args, scores):
+    preprocessing = "preprocessing_pipeline"
+    if args.no_preprocessing:
+        preprocessing = "no_preprocessing"
+
+    data = {
+        "preprocessing": preprocessing,
+        "cnn": args.cnn,
+        "splits_scores": scores,
+        "description": args.desc
+    }
+    with open(args.cv_results_path, "w") as f:
+        json.dump(data, f)
+
+
 def send_cv(args, scores):
     preprocessing = "preprocessing_pipeline"
     if args.no_preprocessing:
@@ -72,7 +92,6 @@ def send_cv(args, scores):
 def cross_val(model, dataset, epochs, score_device):
     cv = VideoDatasetCV(StratifiedKFold(n_splits=5, shuffle=True, random_state=1410))
     scores = cross_val_score(cv, model, dataset, device, epochs, score_device)
-    print(scores) # TODO save score to file instead of printing
     return scores
 
 
@@ -134,7 +153,8 @@ def argparse_setup():
     parser.add_argument("--send-cv", action="store_true")
     parser.add_argument("--db-url", type=str)
     parser.add_argument("--desc", type=str, default="")
-
+    parser.add_argument("--save-cv", action="store_true")
+    parser.add_argument("--cv-results-path" , type=str, default="results.json")
     return parser
 
 

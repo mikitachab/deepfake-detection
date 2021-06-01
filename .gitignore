@@ -10,3 +10,4 @@ export.pth
 metadata.json
 preprocessed_data/
 .env
+results.json
