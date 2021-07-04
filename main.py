@@ -29,7 +29,11 @@ def main(args):
         device = "cpu"
 
     dataset = get_dataset(args)
-    model = RCNN(cnn=args.cnn, rnn_hidden_size=args.rnn_hidden_size, rnn_num_layers=args.rnn_num_layers)
+    model = RCNN(
+        cnn=args.cnn,
+        rnn_hidden_size=args.rnn_hidden_size,
+        rnn_num_layers=args.rnn_num_layers
+    )
 
     print("CNN: ", args.cnn)
     print("Train device", str(device))

@@ -127,7 +127,7 @@ class VideoDataCache:
 def get_dataset(args):
     print("reading data from: ", args.data_path)
     print("creating video dataset")
-    device = torch.device("cuda")
+    device = args.device
 
     transforms = (
         default_transform if args.no_preprocessing else preprocessing_pipeline(device)
