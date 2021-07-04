@@ -16,17 +16,18 @@ from deepfake_detection import (
 )
 from deepfake_detection.cross_validation import cross_val_score
 
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 
 
 def main(args):
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
     random.seed(1410)
     torch.manual_seed(1410)
 
     if args.cpu:
-        global device
         device = "cpu"
+    args.device = device
 
     dataset = get_dataset(args)
     model = RCNN(
