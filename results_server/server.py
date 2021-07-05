@@ -32,6 +32,8 @@ class CVResult(BaseModel):
     splits: List[float]
     preprocessing: str
     description: str
+    rnn_hidden_size: int
+    rnn_num_layers: int
 
 
 class CVResultOut(CVResult):
@@ -48,6 +50,8 @@ class DBCVResult(mongoengine.Document):
     cnn = mongoengine.StringField()
     preprocessing = mongoengine.StringField()
     description = mongoengine.StringField()
+    rnn_hidden_size = mongoengine.IntField()
+    rnn_num_layers = mongoengine.IntField()
 
     meta = {"collection": "results"}
 
@@ -58,6 +62,8 @@ class DBCVResult(mongoengine.Document):
             cnn=result.cnn,
             preprocessing=result.preprocessing,
             description=result.description,
+            rnn_hidden_size=result.rnn_hidden_size,
+            rnn_num_layers=result.rnn_num_layers
         )
 
     def to_model(self):
@@ -66,7 +72,9 @@ class DBCVResult(mongoengine.Document):
             splits=self.splits,
             preprocessing=self.preprocessing,
             datetime=self.datetime.strftime("%m.%d.%Y, %H:%M:%S"),
-            description=self.description
+            description=self.description,
+            rnn_hidden_size=self.rnn_hidden_size,
+            rnn_num_layers=self.rnn_num_layers
         )
 
 

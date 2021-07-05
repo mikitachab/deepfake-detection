@@ -16,7 +16,6 @@ from deepfake_detection import (
 )
 from deepfake_detection.cross_validation import cross_val_score
 
-
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 
@@ -28,6 +27,7 @@ def main(args):
     if args.cpu:
         global device
         device = "cpu"
+
     args.device = device
 
     dataset = get_dataset(args)
@@ -50,26 +50,29 @@ def main(args):
         scores = cross_val(model, dataset, epochs=args.epochs, score_device=args.score_device)
         print(scores)
 
+        cv_results = make_cv_results_data(args, scores)
+
         if args.send_cv:
             send_cv(args, scores)
 
         if args.save_cv:
-            save_cv_results(args, scores)
+            save_cv_results(cv_results, args)
 
 
-def save_cv_results(args, scores):
-    preprocessing = "preprocessing_pipeline"
-    if args.no_preprocessing:
-        preprocessing = "no_preprocessing"
-
-    data = {
-        "preprocessing": preprocessing,
+def make_cv_results_data(args, scores):
+    return {
+        "preprocessing": "no_preprocessing" if args.no_preprocessing else "preprocessing_pipeline",
         "cnn": args.cnn,
         "splits_scores": scores,
-        "description": args.desc
+        "description": args.desc,
+        "rnn_hidden_size": args.rnn_hidden_size,
+        "rnn_num_layers": args.rnn_num_layers,
     }
+
+
+def save_cv_results(cv_results, args):
     with open(args.cv_results_path, "w") as f:
-        json.dump(data, f)
+        json.dump(cv_results, f)
 
 
 def send_cv(args, scores):

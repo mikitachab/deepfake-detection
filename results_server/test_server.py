@@ -38,6 +38,8 @@ def test_can_add_result(client, secret):
             "preprocessing": "preprocessing_pipeline",
             "splits": [0.98, 0.97, 0.98, 0.97, 0.85],
             "description": "first exp",
+            "rnn_hidden_size": 3,
+            "rnn_num_layers": 4
         },
         headers={"X-RESULTS-SECRET": secret},
     )
@@ -48,6 +50,8 @@ def test_can_add_result(client, secret):
     assert data["preprocessing"] == "preprocessing_pipeline"
     assert data["splits"] == [0.98, 0.97, 0.98, 0.97, 0.85]
     assert data["description"] == "first exp"
+    assert data["rnn_hidden_size"] == 3
+    assert data["rnn_num_layers"] == 4
 
     assert "datetime" in data.keys()
 
@@ -60,6 +64,8 @@ def test_can_get_results(client, secret):
             "preprocessing": "preprocessing_pipeline",
             "splits": [0.98, 0.97, 0.98, 0.97, 0.85],
             "description": "first exp",
+            "rnn_hidden_size": 3,
+            "rnn_num_layers": 4
 
         },
         headers={"X-RESULTS-SECRET": secret},
@@ -72,6 +78,8 @@ def test_can_get_results(client, secret):
             "preprocessing": "no_preprocessing",
             "splits": [0.98, 0.97, 0.98, 0.97, 0.85],
             "description": "second exp",
+            "rnn_hidden_size": 3,
+            "rnn_num_layers": 4
         },
         headers={"X-RESULTS-SECRET": secret},
     )
