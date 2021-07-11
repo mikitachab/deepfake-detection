@@ -17,7 +17,6 @@ class SGDLearner:
         dataset,
         loss_func=nn.CrossEntropyLoss(),
         device="cpu",
-        data_limit=None,
     ):
         self.dataset = dataset
         self.device = device

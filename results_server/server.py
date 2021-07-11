@@ -22,7 +22,10 @@ DEFAULT_CONNECTION_NAME = mongoengine.connect(MONGO_DB_ALIAS)
 
 def init_app():
     mongoengine.register_connection(
-        alias=MONGO_DB_ALIAS, name=MONGO_DB_NAME, host=MONGO_DB_HOST, port=MONGO_DB_PORT
+        alias=MONGO_DB_ALIAS,
+        name=MONGO_DB_NAME,
+        host=MONGO_DB_HOST,
+        port=MONGO_DB_PORT,
     )
     return app
 
@@ -63,7 +66,7 @@ class DBCVResult(mongoengine.Document):
             preprocessing=result.preprocessing,
             description=result.description,
             rnn_hidden_size=result.rnn_hidden_size,
-            rnn_num_layers=result.rnn_num_layers
+            rnn_num_layers=result.rnn_num_layers,
         )
 
     def to_model(self):
@@ -74,7 +77,7 @@ class DBCVResult(mongoengine.Document):
             datetime=self.datetime.strftime("%m.%d.%Y, %H:%M:%S"),
             description=self.description,
             rnn_hidden_size=self.rnn_hidden_size,
-            rnn_num_layers=self.rnn_num_layers
+            rnn_num_layers=self.rnn_num_layers,
         )
 
 

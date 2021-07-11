@@ -105,7 +105,11 @@ def cross_val(model, dataset, epochs, score_device):
 
 
 def fit_and_score(model, dataset, args):
-    learner = SGDLearner(model=model, dataset=dataset, device=device)
+    learner = SGDLearner(
+        model=model,
+        dataset=dataset,
+        device=device,
+    )
     s = learner.fit(args.epochs)
     # print("score", learner.score_dataset())
     print(s)
