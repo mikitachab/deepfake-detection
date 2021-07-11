@@ -76,16 +76,7 @@ def save_cv_results(cv_results, args):
 
 
 def send_cv(args, scores):
-    preprocessing = "preprocessing_pipeline"
-    if args.no_preprocessing:
-        preprocessing = "no_preprocessing"
-
-    data = {
-        "preprocessing": preprocessing,
-        "cnn": args.cnn,
-        "splits": scores,
-        "description": args.desc
-    }
+    data = make_cv_results_data(args, scores)
 
     print("sending results")
     print(data)
