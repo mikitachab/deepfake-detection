@@ -63,7 +63,7 @@ def make_cv_results_data(args, scores):
     return {
         "preprocessing": "no_preprocessing" if args.no_preprocessing else "preprocessing_pipeline",
         "cnn": args.cnn,
-        "splits_scores": scores,
+        "splits": scores,
         "description": args.desc,
         "rnn_hidden_size": args.rnn_hidden_size,
         "rnn_num_layers": args.rnn_num_layers,
