@@ -32,7 +32,7 @@ def init_app():
 
 class CVResult(BaseModel):
     cnn: str
-    splits: List[float]
+    splits: dict
     preprocessing: str
     description: str
     rnn_hidden_size: int
@@ -49,7 +49,7 @@ class CVResults(BaseModel):
 
 class DBCVResult(mongoengine.Document):
     datetime = mongoengine.DateTimeField(default=datetime.datetime.now)
-    splits = mongoengine.ListField(mongoengine.FloatField())
+    splits = mongoengine.DictField()
     cnn = mongoengine.StringField()
     preprocessing = mongoengine.StringField()
     description = mongoengine.StringField()
