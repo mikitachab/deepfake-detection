@@ -30,13 +30,22 @@ def client():
     return TestClient(server.app)
 
 
-def test_can_add_result(client, secret):
+@pytest.fixture
+def fake_splits():
+    return [
+        {
+            'train': {'accuracy': 0.668, 'precision': 0.697, 'recall': 0.596}, 
+            'test': {'accuracy': 0.689, 'precision': 0.634, 'recall': 0.892}
+        }
+    ]
+
+def test_can_add_result(client, secret, fake_splits):
     response = client.post(
         "/result",
         json={
             "cnn": "resnet18",
             "preprocessing": "preprocessing_pipeline",
-            "splits": [0.98, 0.97, 0.98, 0.97, 0.85],
+            "splits": fake_splits,
             "description": "first exp",
             "rnn_hidden_size": 3,
             "rnn_num_layers": 4
@@ -48,7 +57,7 @@ def test_can_add_result(client, secret):
     data = response.json()
     assert data["cnn"] == "resnet18"
     assert data["preprocessing"] == "preprocessing_pipeline"
-    assert data["splits"] == [0.98, 0.97, 0.98, 0.97, 0.85]
+    assert data["splits"] == fake_splits
     assert data["description"] == "first exp"
     assert data["rnn_hidden_size"] == 3
     assert data["rnn_num_layers"] == 4
@@ -56,13 +65,13 @@ def test_can_add_result(client, secret):
     assert "datetime" in data.keys()
 
 
-def test_can_get_results(client, secret):
+def test_can_get_results(client, secret, fake_splits):
     response = client.post(
         "/result",
         json={
             "cnn": "resnet18",
             "preprocessing": "preprocessing_pipeline",
-            "splits": [0.98, 0.97, 0.98, 0.97, 0.85],
+            "splits":fake_splits,
             "description": "first exp",
             "rnn_hidden_size": 3,
             "rnn_num_layers": 4
@@ -76,7 +85,7 @@ def test_can_get_results(client, secret):
         json={
             "cnn": "resnet18",
             "preprocessing": "no_preprocessing",
-            "splits": [0.98, 0.97, 0.98, 0.97, 0.85],
+            "splits": fake_splits,
             "description": "second exp",
             "rnn_hidden_size": 3,
             "rnn_num_layers": 4
