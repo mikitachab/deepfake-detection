@@ -38,7 +38,8 @@ def cross_val_score(cv, model, dataset, device, epochs, score_device):
 
         scores.append({
             "train": result["train_scores"],
-            "test": score
+            "test": score,
+            "loss": result["loss"]
         })
 
         print("Train scores")
