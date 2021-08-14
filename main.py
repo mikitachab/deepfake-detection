@@ -52,11 +52,12 @@ def main(args):
 
         cv_results = make_cv_results_data(args, scores)
 
+        if args.save_cv:
+            save_cv_results(cv_results, args)
+
         if args.send_cv:
             send_cv(args, scores)
 
-        if args.save_cv:
-            save_cv_results(cv_results, args)
 
 
 def make_cv_results_data(args, scores):
